@@ -12,25 +12,27 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send('<a href="/auth/google"> auth with google </a>');
+app.get('/api/', (req, res) => {
+    res.send('<a href="api/auth/google"> auth with google </a>');
 });
 
-app.get('/auth/google', passport.authenticate('google', {scope: ['email', 'profile']}));
-app.get('/google/callback', passport.authenticate('google', {
-    failureRedirect: '/auth/failure',
-    successRedirect: '/protected' 
+app.get('api/auth/google', passport.authenticate('google', {scope: ['email', 'profile']}));
+
+app.get('api/google/callback', passport.authenticate('google', {
+    failureRedirect: 'https://devoid.life/api/auth/failure',
+    successRedirect: 'https://devoid.life/api/protected' 
 }));
+
 
 function isLoggedIn(req, res, next) {
     req.user ? next() : res.sendStatus(401);
 }
 
-app.get('/auth/failure', isLoggedIn, (req, res) => {
+app.get('api/auth/failure', isLoggedIn, (req, res) => {
     res.send("something went wrong!");
 });
 
-app.get('/protected', (req, res) => {
+app.get('api/protected', (req, res) => {
     console.log(req.user);
     res.send(`\
         <div>
@@ -40,10 +42,10 @@ app.get('/protected', (req, res) => {
     `);
 });
 
-app.get('/logout', async (req, res) => {
+app.get('api/logout', async (req, res) => {
     req.logout();
     req.session.destroy();
     res.send("goodbye xD!");
 });
 
-app.listen(3000, () => console.log("listening on port 3000."));
+app.listen(5000, () => console.log("listening on port 5000."));
