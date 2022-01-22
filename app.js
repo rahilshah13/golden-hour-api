@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
-const { redisClient } = require('./helpers/redis');
+const { redisClient } = require('./helpers/redisHelper');
 const { pool } = require('./helpers/db');
 require('./helpers/passport');
 
