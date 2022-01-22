@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:current-alpine
 RUN apk add --no-cache curl
 WORKDIR /usr/local/app
 COPY package.json .
