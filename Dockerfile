@@ -5,4 +5,4 @@ COPY package.json .
 RUN npm install
 COPY . .
 #HEALTHCHECK --retries=3 --interval=10s CMD curl -f http://localhost:5000/api || exit 1
-CMD [ "pwd", ";", "ls", ";", "npm", "run", "start"]
+CMD ["node", "app.js"]
