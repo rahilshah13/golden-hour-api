@@ -12,9 +12,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
 
-app.get('/api/', (req, res) => {
-    res.send('<a href="api/auth/google"> auth with google </a>');
+// app.get('/api/', (req, res) => {
+//     res.send('<a href="api/auth/google"> auth with google </a>');
+// });
+
+app.post('/api/auth/login', (req, res) => {
+    res.statusCode = 200;
+    res.send(`<p>LETS GO !!! :))) BODY: " + ${req.body} </p>`);
 });
+
 
 app.get('api/auth/google', passport.authenticate('google', {scope: ['email', 'profile']}));
 
