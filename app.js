@@ -1,54 +1,37 @@
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
-const { redisClient } = require('./helpers/redisHelper');
-const { pool } = require('./helpers/db');
-require('./helpers/passport');
+const cors = require('cors');
+const config = require('./config/googleOAuth.json');
+const { OAuth2Client } = require('google-auth-library');
+//const { redisClient } = require('./helpers/redisHelper');
+//const { pool } = require('./helpers/db');
 
 // create app and add middleware
 const app = express();
 app.use(session({secret: 'cats'}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cors({origin:true,credentials: true}));
 app.use(express.json());
+app.authClient = new OAuth2Client(config.web.client_id, config.web.client_secret);
 
-// app.get('/api/', (req, res) => {
-//     res.send('<a href="api/auth/google"> auth with google </a>');
-// });
-
-app.post('/api/auth/login', (req, res) => {
-    res.statusCode = 200;
-    res.send(`<p>LETS GO !!! :))) BODY: " + ${req.body} </p>`);
+app.post('/api/auth/login', async (req, res) => {
+    const token = req.body.tokenId;
+    const result = await req.app.authClient.verifyIdToken({
+        idToken: token, 
+        audience: config.web.client_id 
+    });
+    // TODO VERIFY HOSTED DOMAIN
+    console.log(result);
+    res.status(200).send(`${req.body}`);
 });
-
-
-app.get('api/auth/google', passport.authenticate('google', {scope: ['email', 'profile']}));
-
-app.get('api/google/callback', passport.authenticate('google', {
-    failureRedirect: 'https://devoid.life/api/auth/failure',
-    successRedirect: 'https://devoid.life/api/protected' 
-}));
-
 
 function isLoggedIn(req, res, next) {
     req.user ? next() : res.sendStatus(401);
 }
 
-app.get('api/auth/failure', isLoggedIn, (req, res) => {
-    res.send("something went wrong!");
-});
-
-app.get('api/protected', (req, res) => {
-    console.log(req.user);
-    res.send(`\
-        <div>
-            <img src="${req.user.photos[0].value}" alt="pfp" width="50" height="50">
-            YELLOW ${req.user.email}!
-        </div>
-    `);
-});
-
-app.get('api/logout', async (req, res) => {
+app.get('api/auth/logout', async (req, res) => {
     req.logout();
     req.session.destroy();
     res.send("goodbye xD!");
