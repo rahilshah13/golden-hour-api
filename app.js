@@ -21,13 +21,15 @@ app.post('/api/auth/login', async (req, res) => {
     if (!result || result.payload.hd != 'vt.edu') 
         return res.status(401).send("Unauthorized. Login with vt.edu email.")
 
-    user = { pid: result.payload.email.split("@")[0], name: result.payload.given_name, pic: result.payload.picture, gender: null, gender_seeking: null, interactions: [] }
-
+    user = { pid: result.payload.email.split("@")[0], name: result.payload.given_name, pic: result.payload.picture, gender: null, gender_seeking: null, interactions: [], token: token}
+    
+    // TODO: Expire Cookie?
+    res.setHeader("Set-Cookie", `token=${token}; HttpOnly`);
     // client is responsible for setting Auth header upon recieving this response
-    return res.status(200).send(`${{...user, token: token}}`);
+    return res.status(200).send(user);
 });
 
-function isLoggedIn(req, res, next) {
+async function isLoggedIn(req, res, next) {
     const result = await req.app.authClient.verifyIdToken({
         idToken: token, 
         audience: config.web.client_id 
