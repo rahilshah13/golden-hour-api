@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const config = require('./config/googleOAuth.json');
 const { OAuth2Client } = require('google-auth-library');
-//const { redisClient } = require('./helpers/redisHelper');
-//const { pool } = require('./helpers/db');
+//const { redisClient } = require('./services/redisService');
+//const { pool } = require('./services/db');
 
 // create app and add middleware
 const app = express();
@@ -21,7 +21,8 @@ app.post('/api/auth/login', async (req, res) => {
     if (!result || result.payload.hd != 'vt.edu') 
         return res.status(401).send("Unauthorized. Login with vt.edu email.")
 
-    user = { pid: result.payload.email.split("@")[0], name: result.payload.given_name, pic: result.payload.picture, gender: null, gender_seeking: null, interactions: [], token: token}
+    console.log(result);
+    user = { pid: result.payload.email.split("@")[0], name: result.payload.given_name, pic: result.payload.picture, token: token}
     
     // TODO: Expire Cookie?
     res.setHeader("Set-Cookie", `token=${token}; HttpOnly`);
