@@ -18,10 +18,8 @@ app.post('/api/auth/login', async (req, res) => {
         audience: config.web.client_id 
     }).catch(e => console.log("Invalid Token."));
 
-    if (!result || result.payload.hd != 'vt.edu') 
-        return res.status(401).send("Unauthorized. Login with vt.edu email.")
-
-    console.log(result);
+    // if (!result || result.payload.hd != 'vt.edu') 
+    //     return res.status(401).send("Unauthorized. Login with vt.edu email.")
     user = { pid: result.payload.email.split("@")[0], name: result.payload.given_name, pic: result.payload.picture, token: token}
     
     // TODO: Expire Cookie?
