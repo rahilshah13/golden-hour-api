@@ -3,7 +3,7 @@ const cors = require('cors');
 const config = require('./config/googleOAuth.json');
 const { OAuth2Client } = require('google-auth-library');
 //const { redisClient } = require('./services/redisService');
-//const { pool } = require('./services/db');
+const { pool } = require('./services/db');
 
 // create app and add middleware
 const app = express();
@@ -28,6 +28,25 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(200).send(user);
 });
 
+app.get('/api/isAdmin', async (req, res) => {
+    
+    if(!req.headers['authorization'])
+        return res.status(404).send('not found.');
+
+    const token = req.headers['authorization'].split(' ')[1];
+    const result = await req.app.authClient.verifyIdToken({
+        idToken: token, 
+        audience: config.web.client_id 
+    }).catch(e => console.log("Invalid Token."));
+
+    const user = await pool.query('SELECT * FROM admins WHERE email=$1', [result.payload.email]);
+    
+    if (user.rows.length === 0) 
+        return res.status(404).send('not an found.');
+    else
+        return res.status(200).send("user is an admin");
+});
+
 async function isLoggedIn(req, res, next) {
     const result = await req.app.authClient.verifyIdToken({
         idToken: token, 
@@ -39,5 +58,7 @@ async function isLoggedIn(req, res, next) {
 app.get('api/auth/logout', isLoggedIn, async (req, res) => {
     res.status(200).send("goodbye xD!");
 });
+
+
 
 app.listen(5000, () => console.log("listening on port 5000."));
