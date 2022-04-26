@@ -29,6 +29,34 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(200).send(user);
 });
 
+app.post('/api/admin/add', async (req, res) => { 
+    const admin = req.body.admin;
+    if (admin == "" || admin === null || admin === undefined) {
+        res.status(400).send('Missing required fields.');
+
+    } else {
+        const result = await pool.query('INSERT INTO admins(email) VALUES ($1)', [admin]);
+        admins = await pool.query('SELECT * FROM admins');
+        res.status(200).send({"admins": admins.rows});
+    }
+});
+
+app.post('/api/admin/delete', async (req, res) => {
+    const admin = req.body.admin;
+    if (admin == "" || admin === null || admin === undefined) {
+        res.status(400).send('Missing required fields.'); 
+
+    } else {
+        const result = await pool.query('DELETE FROM admins WHERE email = $1', [admin]);
+        if (result.rowCount === 0) {
+            res.status(404).send('Admin not found.');
+        } else{
+            admins = await pool.query('SELECT * FROM admins');
+            res.status(200).send({"admins": admins.rows});
+        }
+    }
+});
+
 app.get('/api/isAdmin', async (req, res) => {
     
     if(!req.headers['authorization'])
@@ -46,6 +74,7 @@ app.get('/api/isAdmin', async (req, res) => {
         return res.status(404).send('not an found.');
     }
     else {
+        const admins = await pool.query('SELECT * FROM admins');
         const events = await pool.query('SELECT * FROM gh_events');
         const users = await pool.query('SELECT * FROM users');
         const ia = await pool.query('SELECT * FROM interactions');
@@ -60,7 +89,8 @@ app.get('/api/isAdmin', async (req, res) => {
                             nr: iar.length, 
                             avg_dl: ial.reduce((a, b) => a + parseFloat(b.duration), 0) / ial.length,
                             avg_rl: iar.reduce((a, b) => a + parseFloat(b.duration), 0) / iar.length
-            }
+            },
+            "admins": admins.rows
         });
     }
 });
