@@ -67,27 +67,27 @@ async function initTables() {
     await pool.query(insert_admin, ["aribali3@vt.edu"]).catch(err => console.log("key exists."));
 
     // populate users table
-    var users = [];
-    for(let i = 0; i < 100; i++) {
-        let e = faker.name.firstName() + "@vt.edu", g = random(), a=floor(random()*10 + 18), pl = Math.random() / 2, ph = pl * 2;
-        users.push(e);
-        //await pool.query(insert_user, [e, g, a, pl, ph, "not_ready"]).catch(e=> console.log(e));
-    }
+    // var users = [];
+    // for(let i = 0; i < 100; i++) {
+    //     let e = faker.name.firstName() + "@vt.edu", g = random(), a=floor(random()*10 + 18), pl = Math.random() / 2, ph = pl * 2;
+    //     users.push(e);
+    //     //await pool.query(insert_user, [e, g, a, pl, ph, "not_ready"]).catch(e=> console.log(e));
+    // }
         
-    // populate events table
-    let start = new Date(), admins = ["aribali3@vt.edu", "scdrake19@vt.edu", "rahil@vt.edu"];
-    for (let i=0; i<20; i++) {
-        let end = new Date(start.getTime() + (1000 * 60 * 60));
-        await pool.query(insert_event, [start.toString(), end.toString(), (i%3) + 1]).catch(e=> console.log(e));
-        start = new Date(start.getTime() + (1000 * 60 * 60 * 24 * 7));
-    }
+    // // populate events table
+    // let start = new Date(), admins = ["aribali3@vt.edu", "scdrake19@vt.edu", "rahil@vt.edu"];
+    // for (let i=0; i<20; i++) {
+    //     let end = new Date(start.getTime() + (1000 * 60 * 60));
+    //     await pool.query(insert_event, [start.toString(), end.toString(), (i%3) + 1]).catch(e=> console.log(e));
+    //     start = new Date(start.getTime() + (1000 * 60 * 60 * 24 * 7));
+    // }
 
-    // populate interactions and participants table
-    for (let i=1; i <= 100; i++) {
-        let e1 = users[floor(random() * users.length)], e2 = users[floor(random() * users.length)];
-        await pool.query(insert_interactions, [i%2 == 0 ? "right" : "left", random()*10+1]).catch(e=> console.log(e));
-        await pool.query(insert_particpants, [i, e1, e2]).catch(e=> console.log(e));
-    }
+    // // populate interactions and participants table
+    // for (let i=1; i <= 100; i++) {
+    //     let e1 = users[floor(random() * users.length)], e2 = users[floor(random() * users.length)];
+    //     await pool.query(insert_interactions, [i%2 == 0 ? "right" : "left", random()*10+1]).catch(e=> console.log(e));
+    //     await pool.query(insert_particpants, [i, e1, e2]).catch(e=> console.log(e));
+    // }
 }
 
 (async () => await initTables())();

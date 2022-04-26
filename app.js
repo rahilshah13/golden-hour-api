@@ -4,6 +4,7 @@ const config = require('./config/googleOAuth.json');
 const { OAuth2Client } = require('google-auth-library');
 //const { redisClient } = require('./services/redisService');
 const { pool } = require('./services/db');
+const { parseInputDatesAsUTC } = require('pg/lib/defaults');
 
 // create app and add middleware
 const app = express();
@@ -41,10 +42,27 @@ app.get('/api/isAdmin', async (req, res) => {
 
     const user = await pool.query('SELECT * FROM admins WHERE email=$1', [result.payload.email]);
     
-    if (user.rows.length === 0) 
+    if (user.rows.length === 0) {
         return res.status(404).send('not an found.');
-    else
-        return res.status(200).send("user is an admin");
+    }
+    else {
+        const events = await pool.query('SELECT * FROM gh_events');
+        const users = await pool.query('SELECT * FROM users');
+        const ia = await pool.query('SELECT * FROM interactions');
+        const ial = ia.rows.filter(x => x.outcome === 'left');
+        const iar = ia.rows.filter(x => x.outcome === 'right');
+
+        return res.status(200).send({
+            users: {n: users.rows.length, avg_age: users.rows.reduce((a, b) => a + b.age, 0) / users.rows.length, avg_gender: users.rows.reduce((a, b) => a + parseFloat(b.gender), 0) / users.rows.length},
+            events: {n: events.rows.length},
+            interactions: {n: ia.rows.length, 
+                            nl: ial.length, 
+                            nr: iar.length, 
+                            avg_dl: ial.reduce((a, b) => a + parseFloat(b.duration), 0) / ial.length,
+                            avg_rl: iar.reduce((a, b) => a + parseFloat(b.duration), 0) / iar.length
+            }
+        });
+    }
 });
 
 async function isLoggedIn(req, res, next) {
