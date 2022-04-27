@@ -80,6 +80,7 @@ app.get('/api/isAdmin', async (req, res) => {
         const ia = await pool.query('SELECT * FROM interactions');
         const ial = ia.rows.filter(x => x.outcome === 'left');
         const iar = ia.rows.filter(x => x.outcome === 'right');
+        const outcomes = await pool.query('SELECT * FROM participants JOIN interactions ON participants.interaction_id=interactions.id');
 
         return res.status(200).send({
             users: {n: users.rows.length, avg_age: users.rows.reduce((a, b) => a + b.age, 0) / users.rows.length, avg_gender: users.rows.reduce((a, b) => a + parseFloat(b.gender), 0) / users.rows.length},
@@ -90,7 +91,8 @@ app.get('/api/isAdmin', async (req, res) => {
                             avg_dl: ial.reduce((a, b) => a + parseFloat(b.duration), 0) / ial.length,
                             avg_rl: iar.reduce((a, b) => a + parseFloat(b.duration), 0) / iar.length
             },
-            "admins": admins.rows
+            "admins": admins.rows,
+            "outcomes": outcomes.rows
         });
     }
 });
